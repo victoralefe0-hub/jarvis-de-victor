@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "Message": {
+      "title": "Message",
+      "description": "A chat message in the JARVIS system",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner of the message"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["user", "model"],
+          "description": "Role of the message sender"
+        },
+        "content": {
+          "type": "string",
+          "description": "Text content of the message"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "timestamp",
+          "description": "Creation timestamp"
+        }
+      },
+      "required": ["userId", "role", "content", "createdAt"]
+    },
+    "DeviceStatus": {
+      "title": "Device Status",
+      "description": "Status of a synchronized device",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner of the device"
+        },
+        "deviceName": {
+          "type": "string",
+          "description": "Name of the device"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status"
+        },
+        "batteryLevel": {
+          "type": "number",
+          "description": "Battery level 0-100"
+        },
+        "cpuUsage": {
+          "type": "number",
+          "description": "CPU Usage 0-100"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "timestamp",
+          "description": "Last time the status was updated"
+        }
+      },
+      "required": ["userId", "deviceName", "status", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/messages/{messageId}": {
+      "schema": {
+        "$ref": "Message"
+      },
+      "description": "Messages sent by the user and model"
+    },
+    "/users/{userId}/devices/{deviceId}": {
+      "schema": {
+        "$ref": "DeviceStatus"
+      },
+      "description": "Device synchronization statuses"
+    }
+  }
+}

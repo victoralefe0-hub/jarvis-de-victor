@@ -1,0 +1,1 @@
+{"name":"J.A.R.V.I.S. Core","short_name":"JARVIS","description":"Assistente Virtual Inteligente e Sincronizado","start_url":"/","display":"standalone","background_color":"#050505","theme_color":"#050505","lang":"en","scope":"/","icons":[{"src":"jarvis.svg","sizes":"192x192 512x512","type":"image/svg+xml","purpose":"any maskable"}]}

@@ -1,0 +1,6 @@
+{
+  "name": "J.A.R.V.I.S. Central",
+  "description": "Interface web de assistente IA estilo J.A.R.V.I.S. com controle por voz e tema escuro/vermelho.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": []
+}

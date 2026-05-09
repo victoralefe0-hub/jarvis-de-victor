@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null && request.auth.token.email_verified == true; }
+
+    // No admin role defined right now, so no isAdmin helper
+    
+    match /users/{userId} {
+      // Subcollections are matched below
+      
+      match /messages/{messageId} {
+        function isValidMessage(data) {
+          return data.keys().hasAll(['userId', 'role', 'content', 'createdAt']) && data.keys().size() == 4 &&
+                 data.userId == request.auth.uid &&
+                 data.role is string && data.role.size() <= 20 && (data.role == "user" || data.role == "model") &&
+                 data.content is string && data.content.size() <= 10000 &&
+                 data.createdAt == request.time;
+        }
+
+        allow read, list: if isSignedIn() && userId == request.auth.uid && isValidId(userId);
+        
+        allow create: if isSignedIn() && 
+                         isValidId(userId) && 
+                         isValidId(messageId) && 
+                         userId == request.auth.uid && 
+                         isValidMessage(incoming());
+                         
+        // Messages are immutable once synced, no update or delete.
+      }
+      
+      match /devices/{deviceId} {
+        function isValidDeviceStatus(data, isCreate) {
+          let hasBattery = data.keys().hasAny(['batteryLevel']);
+          let hasCpu = data.keys().hasAny(['cpuUsage']);
+          
+          let expectedSize = 4 + (hasBattery ? 1 : 0) + (hasCpu ? 1 : 0);
+
+          return data.keys().hasAll(['userId', 'deviceName', 'status', 'updatedAt']) && 
+                 data.keys().size() == expectedSize &&
+                 data.userId == request.auth.uid &&
+                 data.deviceName is string && data.deviceName.size() <= 100 &&
+                 data.status is string && data.status.size() <= 100 &&
+                 (!hasBattery || data.batteryLevel is number) &&
+                 (!hasCpu || data.cpuUsage is number) &&
+                 data.updatedAt == request.time;
+        }
+
+        allow read, list: if isSignedIn() && userId == request.auth.uid && isValidId(userId);
+        
+        allow create: if isSignedIn() && 
+                         isValidId(userId) && 
+                         isValidId(deviceId) && 
+                         userId == request.auth.uid && 
+                         isValidDeviceStatus(incoming(), true);
+                         
+        allow update: if isSignedIn() && 
+                         isValidId(userId) && 
+                         isValidId(deviceId) && 
+                         userId == request.auth.uid && 
+                         existing().userId == request.auth.uid &&
+                         isValidDeviceStatus(incoming(), false) &&
+                         (
+                           incoming().diff(existing()).affectedKeys().hasOnly(['status', 'batteryLevel', 'cpuUsage', 'updatedAt'])
+                         );
+      }
+    }
+  }
+}

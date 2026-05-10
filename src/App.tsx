@@ -62,7 +62,6 @@ Agora você possui acesso à pesquisa na web e execução de código em tempo re
 Como assistente de instalação cruzada, você responde a comandos com alta precisão e entende do que se trata se perguntarem sobre controle total do aparelho.
 Mantenha sua personalidade clássica: polido, sagaz, ligeiramente sarcástico e prestativo.`,
           tools: [{ googleSearch: {} }, { codeExecution: {} }],
-          toolConfig: { includeServerSideToolInvocations: true },
           temperature: 0.7
         }
       });
